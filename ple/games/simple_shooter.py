@@ -96,6 +96,7 @@ class Bullet(pygame.sprite.Sprite):
         self.pos_before.y = self.pos.y
 
         self.rect.center = (self.pos.x, self.pos.y)
+        return is_target_hit
 
 
 class Player(pygame.sprite.Sprite):
@@ -345,7 +346,8 @@ class SimpleShooter(PyGameWrapper):
         # doesnt make sense to have this, but include if needed.
         self.score_sum += self.rewards["tick"]
 
-        self.bullet.update(self.agentPlayer, self.target, self.dy, dt)
+        is_target_hit = self.bullet.update(
+            self.agentPlayer, self.target, self.dy, dt)
 
         is_terminal_state = False
 
@@ -361,6 +363,9 @@ class SimpleShooter(PyGameWrapper):
             self.score_counts["agent"] += 1.0
             self._reset_bullet()
             is_terminal_state = True
+
+        if is_target_hit:
+            pass
 
         if is_terminal_state:
             # winning
