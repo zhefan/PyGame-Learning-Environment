@@ -146,11 +146,11 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def updateCpu(self, ball, dt):
+    def updateCpu(self, bullet, dt):
         dy = 0.0
-        if ball.vel.x >= 0 and ball.pos.x >= self.SCREEN_WIDTH / 2:
+        if bullet.vel.x >= 0 and bullet.pos.x >= self.SCREEN_WIDTH / 2:
             dy = self.speed
-            if self.pos.y > ball.pos.y:
+            if self.pos.y > bullet.pos.y:
                 dy = -1.0 * dy
         else:
             dy = 1.0 * self.speed / 4.0
@@ -198,8 +198,7 @@ class SimpleShooter(PyGameWrapper):
         self.dy = 0.0
         self.score_sum = 0.0  # need to deal with 11 on either side winning
         self.score_counts = {
-            "agent": 0.0,
-            "target": 0.0
+            "agent": 0.0
         }
 
     def _handle_player_events(self):
@@ -214,7 +213,6 @@ class SimpleShooter(PyGameWrapper):
             elif keys[self.actions['down']]:
                 self.dy = self.agentPlayer.speed
             elif keys[self.actions['shoot']]:
-                self.bullet.is_shoot = True
                 self.bullet.vel.x = self.bullet.speed
 
             if keys[pygame.QUIT]:
@@ -232,12 +230,9 @@ class SimpleShooter(PyGameWrapper):
                     key = event.key
                     if key == self.actions['up']:
                         self.dy = -self.agentPlayer.speed
-
                     if key == self.actions['down']:
                         self.dy = self.agentPlayer.speed
-
                     if key == self.actions['shoot']:
-                        self.bullet.is_shoot = True
                         self.bullet.vel.x = self.bullet.speed
 
     def getGameState(self):
@@ -251,10 +246,10 @@ class SimpleShooter(PyGameWrapper):
             * player y position.
             * players velocity.
             * target y position.
-            * ball x position.
-            * ball y position.
-            * ball x velocity.
-            * ball y velocity.
+            * bullet x position.
+            * bullet y position.
+            * bullet x velocity.
+            * bullet y velocity.
 
             See code for structure.
 
@@ -275,14 +270,11 @@ class SimpleShooter(PyGameWrapper):
         return self.score_sum
 
     def game_over(self):
-        # pong used 11 as max score
-        return (self.score_counts['agent'] == self.MAX_SCORE) or (
-            self.score_counts['target'] == self.MAX_SCORE)
+        return (self.score_counts['agent'] == self.MAX_SCORE)
 
     def init(self):
         self.score_counts = {
-            "agent": 0.0,
-            "target": 0.0
+            "agent": 0.0
         }
 
         self.score_sum = 0.0
@@ -321,7 +313,7 @@ class SimpleShooter(PyGameWrapper):
 
     def reset(self):
         self.init()
-        # after game over set random direction of ball otherwise it will always be the same
+        # after game over set random direction of bullet otherwise it will always be the same
         self._reset_bullet()
 
     def _reset_bullet(self):
@@ -329,7 +321,6 @@ class SimpleShooter(PyGameWrapper):
         self.bullet.pos.y = self.agentPlayer.pos.y
 
         # we go in the same direction that they lost in but at starting vel.
-        self.bullet.is_shoot = False
         self.bullet.vel.x = 0
         self.bullet.vel.y = 0
 
@@ -349,32 +340,20 @@ class SimpleShooter(PyGameWrapper):
         is_target_hit = self.bullet.update(
             self.agentPlayer, self.target, self.dy, dt)
 
-        is_terminal_state = False
-
         # logic
         if self.bullet.pos.x <= 0:
-            self.score_sum += self.rewards["negative"]
-            self.score_counts["target"] += 1.0
             self._reset_bullet()
-            is_terminal_state = True
 
         if self.bullet.pos.x >= self.width:
-            self.score_sum += self.rewards["positive"]
-            self.score_counts["agent"] += 1.0
             self._reset_bullet()
-            is_terminal_state = True
 
         if is_target_hit:
-            pass
+            self._reset_bullet()
+            self.score_sum += self.rewards["positive"]
+            self.score_counts['agent'] = self.score_sum
 
-        if is_terminal_state:
-            # winning
-            if self.score_counts['agent'] == self.MAX_SCORE:
-                self.score_sum += self.rewards["win"]
-
-            # losing
-            if self.score_counts['target'] == self.MAX_SCORE:
-                self.score_sum += self.rewards["loss"]
+        if self.score_counts['agent'] == self.MAX_SCORE:
+            self.game_over()
         else:
             self.agentPlayer.update(self.dy, dt)
             # self.target.updateCpu(self.bullet, dt)
