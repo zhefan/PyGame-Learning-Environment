@@ -146,7 +146,7 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def updateCpu(self, bullet, dt):
+    def updateTarget(self, bullet, dt):
         dy = 0.0
         if bullet.vel.x >= 0 and bullet.pos.x >= self.SCREEN_WIDTH / 2:
             dy = self.speed
@@ -210,9 +210,10 @@ class SimpleShooter(PyGameWrapper):
             keys = pygame.key.get_pressed()
             if keys[self.actions['up']]:
                 self.dy = -self.agentPlayer.speed
-            elif keys[self.actions['down']]:
+            if keys[self.actions['down']]:
                 self.dy = self.agentPlayer.speed
-            elif keys[self.actions['shoot']]:
+            if keys[self.actions['shoot']]:
+                self.bullet.is_shoot = True
                 self.bullet.vel.x = self.bullet.speed
 
             if keys[pygame.QUIT]:
@@ -233,6 +234,7 @@ class SimpleShooter(PyGameWrapper):
                     if key == self.actions['down']:
                         self.dy = self.agentPlayer.speed
                     if key == self.actions['shoot']:
+                        self.bullet.is_shoot = True
                         self.bullet.vel.x = self.bullet.speed
 
     def getGameState(self):
@@ -319,6 +321,7 @@ class SimpleShooter(PyGameWrapper):
     def _reset_bullet(self):
         self.bullet.pos.x = self.agentPlayer.pos.x
         self.bullet.pos.y = self.agentPlayer.pos.y
+        self.bullet.is_shoot = False
 
         # we go in the same direction that they lost in but at starting vel.
         self.bullet.vel.x = 0
@@ -351,12 +354,8 @@ class SimpleShooter(PyGameWrapper):
             self._reset_bullet()
             self.score_sum += self.rewards["positive"]
             self.score_counts['agent'] = self.score_sum
-
-        if self.score_counts['agent'] == self.MAX_SCORE:
-            self.game_over()
-        else:
             self.agentPlayer.update(self.dy, dt)
-            # self.target.updateCpu(self.bullet, dt)
+            # self.target.updateTarget(self.bullet, dt)
 
         self.players_group.draw(self.screen)
         self.bullet_group.draw(self.screen)
