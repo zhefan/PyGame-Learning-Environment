@@ -172,7 +172,7 @@ class Player(pygame.sprite.Sprite):
 
 class SimpleShooter(PyGameWrapper):
     def __init__(self, width=64, height=48, target_speed_ratio=0.6,
-                 players_speed_ratio=0.4, bullet_speed_ratio=0.75,  MAX_SCORE=11):
+                 players_speed_ratio=1, bullet_speed_ratio=5,  MAX_SCORE=11):
 
         actions = {
             "up": K_UP,
@@ -354,8 +354,9 @@ class SimpleShooter(PyGameWrapper):
             self._reset_bullet()
             self.score_sum += self.rewards["positive"]
             self.score_counts['agent'] = self.score_sum
-            self.agentPlayer.update(self.dy, dt)
-            # self.target.updateTarget(self.bullet, dt)
+
+        self.agentPlayer.update(self.dy, dt)
+        # self.target.updateCpu(self.bullet, dt)
 
         self.players_group.draw(self.screen)
         self.bullet_group.draw(self.screen)
