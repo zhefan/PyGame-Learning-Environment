@@ -171,8 +171,8 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=64, height=48, target_speed_ratio=0.6,
-                 players_speed_ratio=1, bullet_speed_ratio=5,  MAX_SCORE=11):
+    def __init__(self, width=100, height=100, target_speed_ratio=0.6,
+                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_SCORE=11):
 
         actions = {
             "up": K_UP,

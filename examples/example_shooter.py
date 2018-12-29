@@ -8,7 +8,7 @@ Do whatever you want
 '''
 import numpy as np
 from ple import PLE
-from ple.games.simple_shooter import SimpleShooter
+from ple.games.simpleshooter import SimpleShooter
 
 
 class ShootAgent():
@@ -59,3 +59,4 @@ for f in range(nb_frames):
     obs = p.getScreenRGB()
     action = agent.pickAction(reward, obs)
     reward = p.act(action)
+    print('score: {}'.format(reward))
