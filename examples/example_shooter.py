@@ -36,9 +36,17 @@ reward = 0.0
 max_noops = 20
 nb_frames = 15000
 
+
+def process_state(state):
+    return np.array([state["player_y"], state["player_velocity"], state["target_y"],
+                     state["bullet_x"], state["bullet_y"], state["bullet_velocity_x"],
+                     state["bullet_velocity_y"]])
+
+
 # make a PLE instance.
 p = PLE(game, fps=fps, frame_skip=frame_skip, num_steps=num_steps,
-        force_fps=force_fps, display_screen=display_screen)
+        force_fps=force_fps, display_screen=display_screen,
+        state_preprocessor=process_state)
 
 # shooting agent
 agent = ShootAgent(p.getActionSet())
@@ -55,8 +63,11 @@ for f in range(nb_frames):
     # if the game is over
     if p.game_over():
         p.reset_game()
+        print('game over')
 
     obs = p.getScreenRGB()
+    state = p.getGameState()
+    print(state)
     action = agent.pickAction(reward, obs)
     reward = p.act(action)
-    print('score: {}'.format(reward))
+#     print('score: {}'.format(reward))
