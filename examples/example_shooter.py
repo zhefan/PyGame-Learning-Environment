@@ -65,9 +65,16 @@ for f in range(nb_frames):
         p.reset_game()
         print('game over')
 
+    (screen_width, screen_height) = p.getScreenDims()
+    print(screen_width, screen_height)
+    print(p.getGameStateDims())
     obs = p.getScreenRGB()
-    state = p.getGameState()
-    print(state)
-    action = agent.pickAction(reward, obs)
-    reward = p.act(action)
+    from PIL import Image
+    img = Image.fromarray(obs)
+    img.show()
+    # state = p.getGameState()
+    break
+    # print(state)
+    # action = agent.pickAction(reward, obs)
+    # reward = p.act(action)
 #     print('score: {}'.format(reward))
