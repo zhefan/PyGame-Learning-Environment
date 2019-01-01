@@ -71,8 +71,6 @@ class Bullet(pygame.sprite.Sprite):
         self.pos.x += self.vel.x * dt
         if not self.is_shoot:
             self.pos.y = agentPlayer.pos.y
-        else:
-            self.pos.y += self.vel.y * dt
 
         is_target_hit = False
 
@@ -340,6 +338,9 @@ class SimpleShooter(PyGameWrapper):
         # doesnt make sense to have this, but include if needed.
         self.score_sum += self.rewards["tick"]
 
+        self.agentPlayer.update(self.dy, dt)
+        # self.target.updateCpu(self.bullet, dt)
+
         is_target_hit = self.bullet.update(
             self.agentPlayer, self.target, self.dy, dt)
 
@@ -354,9 +355,6 @@ class SimpleShooter(PyGameWrapper):
             self._reset_bullet()
             self.score_sum += self.rewards["positive"]
             self.score_counts['agent'] = self.score_sum
-
-        self.agentPlayer.update(self.dy, dt)
-        # self.target.updateCpu(self.bullet, dt)
 
         self.players_group.draw(self.screen)
         self.bullet_group.draw(self.screen)
