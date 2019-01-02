@@ -83,11 +83,9 @@ class Bullet(pygame.sprite.Sprite):
                 is_target_hit = True
 
         if self.pos.y - self.radius <= 0:
-            self.vel.y *= -0.99
             self.pos.y += 1.0
 
         if self.pos.y + self.radius >= self.SCREEN_HEIGHT:
-            self.vel.y *= -0.99
             self.pos.y -= 1.0
 
         self.pos_before.x = self.pos.x
@@ -129,10 +127,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = pos_init
 
     def update(self, dy, dt):
-        self.vel.y += dy * dt
-        self.vel.y *= 0.9
-
-        self.pos.y += self.vel.y
+        self.vel.y = dy
+        self.pos.y += self.vel.y * dt
 
         if self.pos.y - self.rect_height / 2 <= 0:
             self.pos.y = self.rect_height / 2
@@ -169,7 +165,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=100, height=100, target_speed_ratio=0.6,
+    def __init__(self, width=100, height=100, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_SCORE=1):
 
         actions = {
@@ -188,9 +184,9 @@ class SimpleShooter(PyGameWrapper):
         self.bullet_speed_ratio = bullet_speed_ratio
         self.players_speed_ratio = players_speed_ratio
 
-        self.paddle_width = percent_round_int(width, 0.023)
-        self.paddle_height = percent_round_int(width, 0.023)
-        self.paddle_dist_to_wall = percent_round_int(width, 0.0625)
+        self.player_width = percent_round_int(width, 0.05)
+        self.player_height = percent_round_int(width, 0.05)
+        self.player_dist_to_wall = percent_round_int(width, 0.1)
         self.MAX_SCORE = MAX_SCORE
 
         self.dy = 0.0
@@ -281,17 +277,17 @@ class SimpleShooter(PyGameWrapper):
 
         self.agentPlayer = Player(
             self.players_speed_ratio * self.height,
-            self.paddle_width,
-            self.paddle_height,
-            (self.paddle_dist_to_wall, self.height / 2),
+            self.player_width,
+            self.player_height,
+            (self.player_dist_to_wall, self.height / 2),
             self.width,
             self.height)
 
         self.target = Player(
             self.target_speed_ratio * self.height,
-            self.paddle_width,
-            self.paddle_height,
-            (self.width - self.paddle_dist_to_wall, self.height / 2),
+            self.player_width,
+            self.player_height,
+            (self.width - self.player_dist_to_wall, self.height / 2),
             self.width,
             self.height)
 
@@ -326,7 +322,7 @@ class SimpleShooter(PyGameWrapper):
         self.bullet.vel.y = 0
 
     def step(self, dt):
-        dt /= 1000.0
+        dt = 0.01  # disabled for convenience
         self.screen.fill((0, 0, 0))
 
         self.agentPlayer.speed = self.players_speed_ratio * self.height
@@ -364,7 +360,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = SimpleShooter(width=640, height=480)
+    game = SimpleShooter(width=100, height=100)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
@@ -373,4 +369,5 @@ if __name__ == "__main__":
     while True:
         dt = game.clock.tick_busy_loop(60)
         game.step(dt)
+        print(game.getGameState())
         pygame.display.update()
