@@ -178,7 +178,7 @@ class SimpleShooter(PyGameWrapper):
 
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
-        self.bullet_radius = percent_round_int(width, 0.01)
+        self.bullet_radius = percent_round_int(width, 0.03)
 
         self.target_speed_ratio = target_speed_ratio
         self.bullet_speed_ratio = bullet_speed_ratio
