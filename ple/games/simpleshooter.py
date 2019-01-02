@@ -84,9 +84,11 @@ class Bullet(pygame.sprite.Sprite):
 
         if self.pos.y - self.radius <= 0:
             self.pos.y += 1.0
+            self.vel.x = 0
 
         if self.pos.y + self.radius >= self.SCREEN_HEIGHT:
             self.pos.y -= 1.0
+            self.vel.x = 0
 
         self.pos_before.x = self.pos.x
         self.pos_before.y = self.pos.y
@@ -178,7 +180,7 @@ class SimpleShooter(PyGameWrapper):
 
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
-        self.bullet_radius = percent_round_int(width, 0.03)
+        self.bullet_radius = percent_round_int(width, 0.01)
 
         self.target_speed_ratio = target_speed_ratio
         self.bullet_speed_ratio = bullet_speed_ratio
