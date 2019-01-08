@@ -8,6 +8,7 @@ Do whatever you want
 '''
 
 import sys
+import random
 
 import pygame
 from pygame.constants import K_UP, K_DOWN, K_SPACE
@@ -289,7 +290,7 @@ class SimpleShooter(PyGameWrapper):
             self.target_speed_ratio * self.height,
             self.player_width,
             self.player_height,
-            (self.width - self.player_dist_to_wall, self.height / 2),
+            (self.width - self.player_dist_to_wall, random.randrange(self.height)),
             self.width,
             self.height)
 
@@ -313,6 +314,11 @@ class SimpleShooter(PyGameWrapper):
         self.init()
         # after game over set random direction of bullet otherwise it will always be the same
         self._reset_bullet()
+
+    def _reset_target(self):
+        self.target.pos.x = self.width - self.player_dist_to_wall
+        self.target.pos.y = random.randrange(self.height)
+        self.target.rect.center = (self.target.pos.x, self.target.pos.y)
 
     def _reset_bullet(self):
         self.bullet.pos.x = self.agentPlayer.pos.x
@@ -351,6 +357,7 @@ class SimpleShooter(PyGameWrapper):
 
         if is_target_hit:
             self._reset_bullet()
+            self._reset_target()
             self.score_sum += self.rewards["positive"]
             self.score_counts['agent'] = self.score_sum
 
