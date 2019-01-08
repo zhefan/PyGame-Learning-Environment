@@ -197,6 +197,7 @@ class SimpleShooter(PyGameWrapper):
         self.score_counts = {
             "agent": 0.0
         }
+        self.is_target_hit = False
 
     def _handle_player_events(self):
         self.dy = 0
@@ -269,13 +270,15 @@ class SimpleShooter(PyGameWrapper):
         return self.score_sum
 
     def game_over(self):
-        return (self.score_counts['agent'] == self.MAX_SCORE)
+        return self.is_target_hit
+        # return (self.score_counts['agent'] == self.MAX_SCORE)
 
     def init(self):
         self.score_counts = {
             "agent": 0.0
         }
 
+        self.is_target_hit = False
         self.score_sum = 0.0
 
         self.agentPlayer = Player(
@@ -290,7 +293,8 @@ class SimpleShooter(PyGameWrapper):
             self.target_speed_ratio * self.height,
             self.player_width,
             self.player_height,
-            (self.width - self.player_dist_to_wall, random.randrange(self.height)),
+            (self.width - self.player_dist_to_wall,
+             random.randrange(self.player_height, self.height - self.player_height)),
             self.width,
             self.height)
 
@@ -317,7 +321,8 @@ class SimpleShooter(PyGameWrapper):
 
     def _reset_target(self):
         self.target.pos.x = self.width - self.player_dist_to_wall
-        self.target.pos.y = random.randrange(self.height)
+        self.target.pos.y = random.randrange(
+            self.player_height, self.height - self.player_height)
         self.target.rect.center = (self.target.pos.x, self.target.pos.y)
 
     def _reset_bullet(self):
@@ -339,13 +344,13 @@ class SimpleShooter(PyGameWrapper):
 
         self._handle_player_events()
 
-        # doesnt make sense to have this, but include if needed.
-        self.score_sum += self.rewards["tick"]
+        # cost to move
+        self.score_sum += self.rewards["negative"]
 
         self.agentPlayer.update(self.dy, dt)
         # self.target.updateCpu(self.bullet, dt)
 
-        is_target_hit = self.bullet.update(
+        self.is_target_hit = self.bullet.update(
             self.agentPlayer, self.target, self.dy, dt)
 
         # logic
@@ -355,10 +360,10 @@ class SimpleShooter(PyGameWrapper):
         if self.bullet.pos.x >= self.width:
             self._reset_bullet()
 
-        if is_target_hit:
+        if self.is_target_hit:
             self._reset_bullet()
             self._reset_target()
-            self.score_sum += self.rewards["positive"]
+            self.score_sum += self.rewards["win"]
             self.score_counts['agent'] = self.score_sum
 
         self.players_group.draw(self.screen)
