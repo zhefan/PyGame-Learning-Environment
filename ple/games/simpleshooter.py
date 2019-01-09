@@ -68,7 +68,7 @@ class Bullet(pygame.sprite.Sprite):
         return (s >= 0 and s <= 1 and t >= 0 and t <= 1)
 
     def update(self, agentPlayer, target, dy, dt):
-
+        # bullet moves 1 pix at a time by default
         self.pos.x += self.vel.x * dt
         if not self.is_shoot:
             self.pos.y = agentPlayer.pos.y
@@ -169,7 +169,7 @@ class Player(pygame.sprite.Sprite):
 
 class SimpleShooter(PyGameWrapper):
     def __init__(self, width=100, height=100, target_speed_ratio=1,
-                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_SCORE=1):
+                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=10000):
 
         actions = {
             "up": K_UP,
@@ -190,14 +190,14 @@ class SimpleShooter(PyGameWrapper):
         self.player_width = percent_round_int(width, 0.05)
         self.player_height = percent_round_int(width, 0.05)
         self.player_dist_to_wall = percent_round_int(width, 0.1)
-        self.MAX_SCORE = MAX_SCORE
+        self.MAX_STEPS = MAX_STEPS
+        self.n_steps = 0
 
         self.dy = 0.0
         self.score_sum = 0.0  # need to deal with 11 on either side winning
         self.score_counts = {
             "agent": 0.0
         }
-        self.is_target_hit = False
 
     def _handle_player_events(self):
         self.dy = 0
@@ -270,15 +270,13 @@ class SimpleShooter(PyGameWrapper):
         return self.score_sum
 
     def game_over(self):
-        return self.is_target_hit
-        # return (self.score_counts['agent'] == self.MAX_SCORE)
+        return (self.n_steps == self.MAX_STEPS)
 
     def init(self):
         self.score_counts = {
             "agent": 0.0
         }
 
-        self.is_target_hit = False
         self.score_sum = 0.0
 
         self.agentPlayer = Player(
@@ -335,22 +333,24 @@ class SimpleShooter(PyGameWrapper):
         self.bullet.vel.y = 0
 
     def step(self, dt):
+        self.n_steps += 1
         dt = 0.01  # disabled for convenience
         self.screen.fill((0, 0, 0))
 
         self.agentPlayer.speed = self.players_speed_ratio * self.height
         self.target.speed = self.target_speed_ratio * self.height
-        self.bullet.speed = self.bullet_speed_ratio * self.height
+        # with dt=1, bullet moves one pixel each step
+        self.bullet.speed = self.bullet_speed_ratio * 100
 
         self._handle_player_events()
 
         # cost to move
-        self.score_sum += self.rewards["negative"]
+        self.score_sum += self.rewards["tick"]
 
         self.agentPlayer.update(self.dy, dt)
         # self.target.updateCpu(self.bullet, dt)
 
-        self.is_target_hit = self.bullet.update(
+        is_target_hit = self.bullet.update(
             self.agentPlayer, self.target, self.dy, dt)
 
         # logic
@@ -360,10 +360,10 @@ class SimpleShooter(PyGameWrapper):
         if self.bullet.pos.x >= self.width:
             self._reset_bullet()
 
-        if self.is_target_hit:
+        if is_target_hit:
             self._reset_bullet()
             self._reset_target()
-            self.score_sum += self.rewards["win"]
+            self.score_sum += self.rewards["positive"]
             self.score_counts['agent'] = self.score_sum
 
         self.players_group.draw(self.screen)
