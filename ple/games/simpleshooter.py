@@ -277,6 +277,7 @@ class SimpleShooter(PyGameWrapper):
             "agent": 0.0
         }
 
+        self.n_steps = 0
         self.score_sum = 0.0
 
         self.agentPlayer = Player(
