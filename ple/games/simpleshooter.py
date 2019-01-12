@@ -294,7 +294,7 @@ class SimpleShooter(PyGameWrapper):
             self.player_height,
             (self.width - self.player_dist_to_wall,
              random.randrange(self.player_height / 2,
-                              self.height - self.player_height / 2 - 1)),
+                              self.height - self.player_height / 2)),
             self.width,
             self.height)
 
@@ -322,7 +322,7 @@ class SimpleShooter(PyGameWrapper):
     def _reset_target(self):
         self.target.pos.x = self.width - self.player_dist_to_wall
         self.target.pos.y = random.randrange(
-            self.player_height / 2, self.height - self.player_height / 2 - 1)
+            self.player_height / 2, self.height - self.player_height / 2)
         self.target.rect.center = (self.target.pos.x, self.target.pos.y)
 
     def _reset_bullet(self):
