@@ -137,8 +137,8 @@ class Player(pygame.sprite.Sprite):
             self.pos.y = self.rect_height / 2
             self.vel.y = 0.0
 
-        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT:
-            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2
+        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
             self.vel.y = 0.0
 
         self.rect.center = (self.pos.x, self.pos.y)
@@ -168,7 +168,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=118, height=109, target_speed_ratio=1,
+    def __init__(self, width=118, height=110, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=10000):
 
         actions = {
@@ -293,7 +293,8 @@ class SimpleShooter(PyGameWrapper):
             self.player_width,
             self.player_height,
             (self.width - self.player_dist_to_wall,
-             random.randrange(self.player_height, self.height - self.player_height)),
+             random.randrange(self.player_height / 2,
+                              self.height - self.player_height / 2 - 1)),
             self.width,
             self.height)
 
@@ -321,7 +322,7 @@ class SimpleShooter(PyGameWrapper):
     def _reset_target(self):
         self.target.pos.x = self.width - self.player_dist_to_wall
         self.target.pos.y = random.randrange(
-            self.player_height, self.height - self.player_height)
+            self.player_height / 2, self.height - self.player_height / 2 - 1)
         self.target.rect.center = (self.target.pos.x, self.target.pos.y)
 
     def _reset_bullet(self):
@@ -376,7 +377,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = SimpleShooter(width=118, height=109)
+    game = SimpleShooter()
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
