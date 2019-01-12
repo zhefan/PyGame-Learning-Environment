@@ -168,7 +168,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=100, height=100, target_speed_ratio=1,
+    def __init__(self, width=118, height=109, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=10000):
 
         actions = {
@@ -181,15 +181,15 @@ class SimpleShooter(PyGameWrapper):
 
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
-        self.bullet_radius = percent_round_int(width, 0.01)
+        self.bullet_radius = percent_round_int(width, 0.025)
 
         self.target_speed_ratio = target_speed_ratio
         self.bullet_speed_ratio = bullet_speed_ratio
         self.players_speed_ratio = players_speed_ratio
 
-        self.player_width = percent_round_int(width, 0.05)
-        self.player_height = percent_round_int(width, 0.05)
-        self.player_dist_to_wall = percent_round_int(width, 0.1)
+        self.player_width = percent_round_int(width, 0.1)
+        self.player_height = percent_round_int(height, 0.1)
+        self.player_dist_to_wall = percent_round_int(width, 0.05)
         self.MAX_STEPS = MAX_STEPS
         self.n_steps = 0
 
@@ -255,11 +255,11 @@ class SimpleShooter(PyGameWrapper):
 
         """
         state = {
-            "player_y": self.agentPlayer.pos.y,
+            "player_y": self.agentPlayer.pos.y - self.player_height / 2,  # offset
             "player_velocity": self.agentPlayer.vel.y,
-            "target_y": self.target.pos.y,
-            "bullet_x": self.bullet.pos.x,
-            "bullet_y": self.bullet.pos.y,
+            "target_y": self.target.pos.y - self.player_height / 2,  # offset
+            "bullet_x": self.bullet.pos.x - self.player_dist_to_wall,  # offset
+            "bullet_y": self.bullet.pos.y - self.player_height / 2,  # offset
             "bullet_velocity_x": self.bullet.vel.x,
             "bullet_velocity_y": self.bullet.vel.y
         }
@@ -338,7 +338,8 @@ class SimpleShooter(PyGameWrapper):
         dt = 0.01  # disabled for convenience
         self.screen.fill((0, 0, 0))
 
-        self.agentPlayer.speed = self.players_speed_ratio * self.height
+        # with dt=1, agent moves one pixel each step
+        self.agentPlayer.speed = self.players_speed_ratio * 100
         self.target.speed = self.target_speed_ratio * self.height
         # with dt=1, bullet moves one pixel each step
         self.bullet.speed = self.bullet_speed_ratio * 100
@@ -375,7 +376,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = SimpleShooter(width=100, height=100)
+    game = SimpleShooter(width=118, height=109)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
