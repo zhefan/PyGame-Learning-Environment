@@ -317,7 +317,14 @@ class SimpleShooter(PyGameWrapper):
     def reset(self):
         self.init()
         # after game over set random direction of bullet otherwise it will always be the same
+        # self._reset_player()
         self._reset_bullet()
+
+    def _reset_player(self):
+        self.agentPlayer.pos.x = self.player_dist_to_wall
+        self.agentPlayer.pos.y = self.height / 2
+        self.agentPlayer.rect.center = (
+            self.agentPlayer.pos.x, self.agentPlayer.pos.y)
 
     def _reset_target(self):
         self.target.pos.x = self.width - self.player_dist_to_wall
@@ -364,6 +371,7 @@ class SimpleShooter(PyGameWrapper):
             self._reset_bullet()
 
         if is_target_hit:
+            # self._reset_player()
             self._reset_bullet()
             self._reset_target()
             self.score_sum += self.rewards["positive"]
