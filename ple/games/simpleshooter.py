@@ -21,13 +21,12 @@ from ple.games.base.pygamewrapper import PyGameWrapper
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, radius, speed, rng,
+    def __init__(self, square_width, speed,
                  pos_init, SCREEN_WIDTH, SCREEN_HEIGHT):
 
         pygame.sprite.Sprite.__init__(self)
 
-        self.rng = rng
-        self.radius = radius
+        self.square_width = square_width
         self.speed = speed
         self.pos = vec2d(pos_init)
         self.pos_before = vec2d(pos_init)
@@ -37,15 +36,14 @@ class Bullet(pygame.sprite.Sprite):
         self.SCREEN_HEIGHT = SCREEN_HEIGHT
         self.SCREEN_WIDTH = SCREEN_WIDTH
 
-        image = pygame.Surface((radius * 2, radius * 2))
+        image = pygame.Surface((square_width, square_width))
         image.fill((0, 0, 0, 0))
         image.set_colorkey((0, 0, 0))
 
-        pygame.draw.circle(
+        pygame.draw.rect(
             image,
             (255, 255, 255),
-            (radius, radius),
-            radius,
+            (0, 0, square_width, square_width),
             0
         )
 
@@ -85,13 +83,13 @@ class Bullet(pygame.sprite.Sprite):
         #                               target.pos.y + target.rect_height / 2):
         #         is_target_hit = True
 
-        if self.pos.y - self.radius <= 0:
-            self.pos.y += 1.0
-            self.vel.x = 0
+        if self.pos.y - self.square_width / 2 <= 0:
+            self.pos.y = self.square_width / 2
+            self.vel.y = 0.0
 
-        if self.pos.y + self.radius >= self.SCREEN_HEIGHT:
-            self.pos.y -= 1.0
-            self.vel.x = 0
+        if self.pos.y + self.square_width / 2 >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - self.square_width / 2 - 1
+            self.vel.y = 0.0
 
         self.pos_before.x = self.pos.x
         self.pos_before.y = self.pos.y
@@ -170,7 +168,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=112, height=110, target_speed_ratio=1,
+    def __init__(self, width=102, height=100, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=10000):
 
         actions = {
@@ -183,15 +181,15 @@ class SimpleShooter(PyGameWrapper):
 
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
-        self.bullet_radius = percent_round_int(width, 0.025)
+        self.bullet_width = 1
 
         self.target_speed_ratio = target_speed_ratio
         self.bullet_speed_ratio = bullet_speed_ratio
         self.players_speed_ratio = players_speed_ratio
 
-        self.player_width = percent_round_int(width, 0.1)
-        self.player_height = percent_round_int(height, 0.1)
-        self.player_dist_to_wall = percent_round_int(width, 0.05)
+        self.player_width = 1
+        self.player_height = 1
+        self.player_dist_to_wall = 1
         self.MAX_STEPS = MAX_STEPS
         self.n_steps = 0
 
@@ -301,9 +299,8 @@ class SimpleShooter(PyGameWrapper):
             self.height)
 
         self.bullet = Bullet(
-            self.bullet_radius,
+            self.bullet_width,
             self.bullet_speed_ratio * self.height,
-            self.rng,
             (self.agentPlayer.pos.x, self.agentPlayer.pos.y),
             self.width,
             self.height
