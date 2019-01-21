@@ -75,13 +75,15 @@ class Bullet(pygame.sprite.Sprite):
 
         is_target_hit = False
 
-        if self.pos.x >= target.pos.x - target.rect_width:
-            if self.line_intersection(self.pos_before.x, self.pos_before.y, self.pos.x, self.pos.y,
-                                      target.pos.x - target.rect_width / 2,
-                                      target.pos.y - target.rect_height / 2,
-                                      target.pos.x - target.rect_width / 2,
-                                      target.pos.y + target.rect_height / 2):
-                is_target_hit = True
+        if self.pos.x == target.pos.x and self.pos.y == target.pos.y:
+            is_target_hit = True
+        # if self.pos.x >= target.pos.x - target.rect_width:
+        #     if self.line_intersection(self.pos_before.x, self.pos_before.y, self.pos.x, self.pos.y,
+        #                               target.pos.x - target.rect_width / 2,
+        #                               target.pos.y - target.rect_height / 2,
+        #                               target.pos.x - target.rect_width / 2,
+        #                               target.pos.y + target.rect_height / 2):
+        #         is_target_hit = True
 
         if self.pos.y - self.radius <= 0:
             self.pos.y += 1.0
@@ -168,7 +170,7 @@ class Player(pygame.sprite.Sprite):
 
 
 class SimpleShooter(PyGameWrapper):
-    def __init__(self, width=118, height=110, target_speed_ratio=1,
+    def __init__(self, width=112, height=110, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=10000):
 
         actions = {
