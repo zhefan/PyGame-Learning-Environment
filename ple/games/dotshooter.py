@@ -16,7 +16,6 @@ from ple.games.utils.vec2d import vec2d
 
 #import base
 from ple.games.base.pygamewrapper import PyGameWrapper
-from ple.games.simpleshooter import Player
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -93,6 +92,75 @@ class Bullet(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
         return ret_val
+
+
+class Player(pygame.sprite.Sprite):
+
+    def __init__(self, speed, rect_width, rect_height,
+                 pos_init, SCREEN_WIDTH, SCREEN_HEIGHT):
+
+        pygame.sprite.Sprite.__init__(self)
+
+        self.speed = speed
+        self.pos = vec2d(pos_init)
+        self.vel = vec2d((0, 0))
+
+        self.rect_height = rect_height
+        self.rect_width = rect_width
+        self.SCREEN_HEIGHT = SCREEN_HEIGHT
+        self.SCREEN_WIDTH = SCREEN_WIDTH
+
+        image = pygame.Surface((rect_width, rect_height))
+        image.fill((0, 0, 0, 0))
+        image.set_colorkey((0, 0, 0))
+
+        pygame.draw.rect(
+            image,
+            (255, 255, 255),
+            (0, 0, rect_width, rect_height),
+            0
+        )
+
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.center = pos_init
+
+    def update(self, dy, dt):
+        self.vel.y = dy
+        self.pos.y += self.vel.y * dt
+
+        if self.pos.y - self.rect_height / 2 <= 0:
+            self.pos.y = self.rect_height / 2
+            self.vel.y = 0.0
+
+        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
+            self.vel.y = 0.0
+
+        self.rect.center = (self.pos.x, self.pos.y)
+
+    def updateTarget(self, dt):
+        dy = 0.0
+        if bullet.vel.x >= 0 and bullet.pos.x >= self.SCREEN_WIDTH / 2:
+            dy = self.speed
+            if self.pos.y > bullet.pos.y:
+                dy = -1.0 * dy
+        else:
+            dy = 1.0 * self.speed / 4.0
+
+            if self.pos.y > self.SCREEN_HEIGHT / 2.0:
+                dy = -1.0 * self.speed / 4.0
+
+        if self.pos.y - self.rect_height / 2 <= 0:
+            self.pos.y = self.rect_height / 2
+            self.vel.y = 0.0
+
+        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
+            self.vel.y = 0.0
+
+        self.pos.y += dy * dt
+        self.rect.center = (self.pos.x, self.pos.y)
 
 
 class DotShooter(PyGameWrapper):
