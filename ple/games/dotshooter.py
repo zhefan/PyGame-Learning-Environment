@@ -139,32 +139,21 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def updateTarget(self, dt):
-        dy = 0.0
-        if bullet.vel.x >= 0 and bullet.pos.x >= self.SCREEN_WIDTH / 2:
-            dy = self.speed
-            if self.pos.y > bullet.pos.y:
-                dy = -1.0 * dy
-        else:
-            dy = 1.0 * self.speed / 4.0
+    def updateMovingTarget(self, dt):
+        self.vel.y = self.speed
+        self.pos.y += self.vel.y * dt
 
-            if self.pos.y > self.SCREEN_HEIGHT / 2.0:
-                dy = -1.0 * self.speed / 4.0
-
-        if self.pos.y - self.rect_height / 2 <= 0:
-            self.pos.y = self.rect_height / 2
-            self.vel.y = 0.0
-
-        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
+        if self.pos.y - self.rect_height / 2 < 0:
             self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
-            self.vel.y = 0.0
 
-        self.pos.y += dy * dt
+        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT:
+            self.pos.y = self.rect_height / 2
+
         self.rect.center = (self.pos.x, self.pos.y)
 
 
 class DotShooter(PyGameWrapper):
-    def __init__(self, width=22, height=21, target_speed_ratio=1,
+    def __init__(self, version=0, width=22, height=21, target_speed_ratio=1,
                  players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=100):
 
         actions = {
@@ -174,7 +163,7 @@ class DotShooter(PyGameWrapper):
         }
 
         PyGameWrapper.__init__(self, width, height, actions=actions)
-
+        self.version = version
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
         self.bullet_width = 1
@@ -332,7 +321,7 @@ class DotShooter(PyGameWrapper):
 
         # with dt=1, agent moves one pixel each step
         self.agentPlayer.speed = self.players_speed_ratio * 100
-        self.target.speed = self.target_speed_ratio * self.height
+        self.target.speed = self.target_speed_ratio * 100
 
         self._handle_player_events()
 
@@ -340,7 +329,9 @@ class DotShooter(PyGameWrapper):
         self.score_sum += self.rewards["tick"]
 
         self.agentPlayer.update(self.dy, dt)
-        # self.target.updateCpu(self.bullet, dt)
+        if self.version == 1:  # moving target
+            self.target.updateMovingTarget(dt)
+
         to_del = []
         for idx, bullet in enumerate(self.bullet_list):
             bullet_status = bullet.update(self.target, dt)
