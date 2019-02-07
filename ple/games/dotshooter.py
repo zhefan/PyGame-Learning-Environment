@@ -116,7 +116,7 @@ class Player(pygame.sprite.Sprite):
 
         pygame.draw.rect(
             image,
-            (255, 255, 255),
+            (255, 0, 0),
             (0, 0, rect_width, rect_height),
             0
         )
@@ -139,9 +139,10 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def updateMovingTarget(self, dt):
-        self.vel.y = self.speed
-        self.pos.y += self.vel.y * dt
+    def updateMovingTarget(self, dt, steps):
+        if steps % 5 == 0:  # move every 5 steps
+            self.vel.y = self.speed
+            self.pos.y += self.vel.y * dt
 
         if self.pos.y - self.rect_height / 2 < 0:
             self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
@@ -330,7 +331,7 @@ class DotShooter(PyGameWrapper):
 
         self.agentPlayer.update(self.dy, dt)
         if self.version == 1:  # moving target
-            self.target.updateMovingTarget(dt)
+            self.target.updateMovingTarget(dt, self.n_steps)
 
         to_del = []
         for idx, bullet in enumerate(self.bullet_list):
