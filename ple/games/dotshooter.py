@@ -139,9 +139,9 @@ class Player(pygame.sprite.Sprite):
 
         self.rect.center = (self.pos.x, self.pos.y)
 
-    def updateMovingTarget(self, dt, steps, direction):
+    def updateMovingTarget(self, dt, steps):
         if steps % 5 == 0:  # move every 5 steps
-            self.vel.y = direction * self.speed
+            self.vel.y = self.speed
             self.pos.y += self.vel.y * dt
 
         if self.pos.y - self.rect_height / 2 < 0:
@@ -149,6 +149,22 @@ class Player(pygame.sprite.Sprite):
 
         if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT:
             self.pos.y = self.rect_height / 2
+
+        self.rect.center = (self.pos.x, self.pos.y)
+
+    def updateRandomTarget(self, dt, steps):
+        if steps % 5 == 0:  # move every 5 steps
+            if random.uniform(-1, 1) < 0:
+                self.vel.y = -1 * self.speed
+            else:
+                self.vel.y = self.speed
+            self.pos.y += self.vel.y * dt
+
+        if self.pos.y - self.rect_height / 2 <= 0:
+            self.pos.y = self.rect_height / 2
+
+        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
 
         self.rect.center = (self.pos.x, self.pos.y)
 
@@ -331,12 +347,9 @@ class DotShooter(PyGameWrapper):
 
         self.agentPlayer.update(self.dy, dt)
         if self.version == 1:  # moving target
-            self.target.updateMovingTarget(dt, self.n_steps, 1)
+            self.target.updateMovingTarget(dt, self.n_steps)
         elif self.version == 2:  # random moving target
-            if random.uniform(-1, 1) < 0:
-                self.target.updateMovingTarget(dt, self.n_steps, -1)
-            else:
-                self.target.updateMovingTarget(dt, self.n_steps, 1)
+            self.target.updateRandomTarget(dt, self.n_steps)
 
         to_del = []
         for idx, bullet in enumerate(self.bullet_list):
