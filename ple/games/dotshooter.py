@@ -184,6 +184,7 @@ class DotShooter(PyGameWrapper):
         # the %'s come from original values, wanted to keep same ratio when you
         # increase the resolution.
         self.bullet_width = 1
+        self.max_bullets = 1
 
         self.target_speed_ratio = target_speed_ratio
         # with dt=1, bullet moves one pixel each step
@@ -213,7 +214,7 @@ class DotShooter(PyGameWrapper):
                 self.dy = -self.agentPlayer.speed
             if keys[self.actions['down']]:
                 self.dy = self.agentPlayer.speed
-            if keys[self.actions['shoot']]:
+            if keys[self.actions['shoot']] and len(self.bullet_group) < self.max_bullets:
                 bullet = self._create_bullet()
                 self.bullet_group.add(bullet)
                 self.bullet_list.append(bullet)
@@ -235,7 +236,7 @@ class DotShooter(PyGameWrapper):
                         self.dy = -self.agentPlayer.speed
                     if key == self.actions['down']:
                         self.dy = self.agentPlayer.speed
-                    if key == self.actions['shoot']:
+                    if key == self.actions['shoot'] and len(self.bullet_group) < self.max_bullets:
                         bullet = self._create_bullet()
                         self.bullet_group.add(bullet)
                         self.bullet_list.append(bullet)
@@ -257,6 +258,7 @@ class DotShooter(PyGameWrapper):
         state = {
             "player_y": self.agentPlayer.pos.y - self.player_height / 2,  # offset
             "target_y": self.target.pos.y - self.player_height / 2,  # offset
+            "bullet": len(self.bullet_group)  # number of bullets, max 1
         }
 
         return state
