@@ -196,6 +196,7 @@ class DotShooter(PyGameWrapper):
         self.player_dist_to_wall = 1
         self.MAX_STEPS = MAX_STEPS
         self.n_steps = 0
+        self.target_hit = False
 
         self.dy = 0.0
         self.score_sum = 0.0  # need to deal with 11 on either side winning
@@ -267,7 +268,11 @@ class DotShooter(PyGameWrapper):
         return self.score_sum
 
     def game_over(self):
-        return (self.n_steps == self.MAX_STEPS)
+        if self.n_steps == self.MAX_STEPS:
+            return True
+        if self.version == 3:
+            return self.target_hit
+        return False
 
     def init(self):
         self.score_counts = {
@@ -301,6 +306,7 @@ class DotShooter(PyGameWrapper):
 
         self.bullet_group = pygame.sprite.Group()
         self.bullet_list = []
+        self.target_hit = False
 
     def _create_bullet(self):
         bullet = Bullet(
@@ -364,6 +370,7 @@ class DotShooter(PyGameWrapper):
                 self._reset_target()
                 self.score_sum += self.rewards["positive"]
                 self.score_counts['agent'] = self.score_sum
+                self.target_hit = True
             elif bullet_status == 2:  # out of bound
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
