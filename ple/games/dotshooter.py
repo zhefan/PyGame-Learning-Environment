@@ -272,6 +272,10 @@ class DotShooter(PyGameWrapper):
             # exceed max step and no bullet in flight
             if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
                 return True
+        elif self.version == 5:  # shot clock one hit
+            if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
+                return True
+            return self.target_hit
         else:
             if self.n_steps == self.MAX_STEPS:
                 return True
