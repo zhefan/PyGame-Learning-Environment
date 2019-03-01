@@ -268,10 +268,15 @@ class DotShooter(PyGameWrapper):
         return self.score_sum
 
     def game_over(self):
-        if self.n_steps == self.MAX_STEPS:
-            return True
-        if self.version == 3:
-            return self.target_hit
+        if self.version == 4:  # shot clock
+            # exceed max step and no bullet in flight
+            if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
+                return True
+        else:
+            if self.n_steps == self.MAX_STEPS:
+                return True
+            if self.version == 3:
+                return self.target_hit
         return False
 
     def init(self):
