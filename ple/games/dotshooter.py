@@ -170,8 +170,8 @@ class Player(pygame.sprite.Sprite):
 
 
 class DotShooter(PyGameWrapper):
-    def __init__(self, version=0, width=22, height=21, target_speed_ratio=1,
-                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=100):
+    def __init__(self, version=0, width=52, height=50, target_speed_ratio=1,
+                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=200):
 
         actions = {
             "up": K_UP,
@@ -376,7 +376,8 @@ class DotShooter(PyGameWrapper):
                 # self._reset_player()
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
-                self._reset_target()
+                if not (self.version == 3 or self.version == 5):
+                    self._reset_target()  # reset if not one hit
                 self.score_sum += self.rewards["positive"]
                 self.score_counts['agent'] = self.score_sum
                 self.target_hit = True
@@ -404,5 +405,10 @@ if __name__ == "__main__":
     while True:
         dt = game.clock.tick_busy_loop(60)
         game.step(dt)
-        print(game.getGameState(), len(game.bullet_list), game.score_sum)
+        if game.bullet_list:
+            print('player x: {}, player y: {}, target x: {}, target y: {}, bullet x: {}, score {}'.format(
+                game.agentPlayer.pos.x, game.agentPlayer.pos.y, game.target.pos.x,
+                game.target.pos.y, game.bullet_list[0].pos.x, game.score_sum))
+        else:
+            print(game.getGameState(), len(game.bullet_list), game.score_sum)
         pygame.display.update()
