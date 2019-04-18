@@ -63,7 +63,7 @@ class Bullet(pygame.sprite.Sprite):
 
         return (s >= 0 and s <= 1 and t >= 0 and t <= 1)
 
-    def update(self, target, dt):
+    def update(self, targets, dt):
         """update bullet movement
 
         Arguments:
@@ -71,21 +71,26 @@ class Bullet(pygame.sprite.Sprite):
             dt {float} -- 0.01
 
         Returns:
-            int -- 1 if hit, 2 if out of bound
+            int -- > 0 if hit, 0 out of bound
         """
 
         # bullet moves 1 pix at a time by default
         self.pos.x += self.speed * dt
-        ret_val = 0
+        ret_val = -1
 
         # target hit
-        if self.pos.x == target.pos.x and self.pos.y == target.pos.y:
-            ret_val = 1
+        if isinstance(targets, list):
+            for idx, target in enumerate(targets):
+                if self.pos.x == target.pos.x and self.pos.y == target.pos.y:
+                    ret_val = idx + 1
+        else:
+            if self.pos.x == targets.pos.x and self.pos.y == targets.pos.y:
+                ret_val = 1
 
         # boundry check
         if self.pos.y < 0 or self.pos.y > self.SCREEN_HEIGHT or \
                 self.pos.x < 0 or self.pos.x > self.SCREEN_WIDTH:
-            ret_val = 2
+            ret_val = 0
 
         self.pos_before.x = self.pos.x
         self.pos_before.y = self.pos.y
@@ -97,7 +102,7 @@ class Bullet(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, speed, rect_width, rect_height,
-                 pos_init, SCREEN_WIDTH, SCREEN_HEIGHT):
+                 pos_init, SCREEN_WIDTH, SCREEN_HEIGHT, color=(255, 0, 0)):
 
         pygame.sprite.Sprite.__init__(self)
 
@@ -116,7 +121,7 @@ class Player(pygame.sprite.Sprite):
 
         pygame.draw.rect(
             image,
-            (255, 0, 0),
+            color,
             (0, 0, rect_width, rect_height),
             0
         )
@@ -272,7 +277,7 @@ class DotShooter(PyGameWrapper):
             # exceed max step and no bullet in flight
             if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
                 return True
-        elif self.version == 5:  # shot clock one hit
+        elif self.version == 5 or self.version == 6:  # shot clock one hit
             if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
                 return True
             return self.target_hit
@@ -291,27 +296,55 @@ class DotShooter(PyGameWrapper):
         self.n_steps = 0
         self.score_sum = 0.0
 
-        self.agentPlayer = Player(
-            self.players_speed_ratio * self.height,
-            self.player_width,
-            self.player_height,
-            (self.player_dist_to_wall, self.height / 2),
-            self.width,
-            self.height)
-
-        self.target = Player(
-            self.target_speed_ratio * self.height,
-            self.player_width,
-            self.player_height,
-            (self.width - self.player_dist_to_wall,
-             random.randrange(self.player_height / 2,
-                              self.height - self.player_height / 2)),
-            self.width,
-            self.height)
+        if self.version == 6:
+            self.agentPlayer = Player(
+                self.players_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.player_dist_to_wall,
+                 random.randrange(self.player_height / 2,
+                                  self.height - self.player_height / 2)),
+                self.width, self.height)
+            self.target = Player(
+                self.target_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.width - self.player_dist_to_wall, self.height / 2),
+                self.width, self.height)
+            self.target_1 = Player(  # distraction
+                self.target_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.width - self.player_dist_to_wall, self.height / 4),
+                self.width, self.height, color=(0, 255, 0))
+            self.target_2 = Player(  # distraction
+                self.target_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.width - self.player_dist_to_wall, self.height * 3 / 4),
+                self.width, self.height, color=(0, 255, 0))
+        else:
+            self.agentPlayer = Player(
+                self.players_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.player_dist_to_wall, self.height / 2),
+                self.width, self.height)
+            self.target = Player(
+                self.target_speed_ratio * self.height,
+                self.player_width,
+                self.player_height,
+                (self.width - self.player_dist_to_wall,
+                 random.randrange(self.player_height / 2,
+                                  self.height - self.player_height / 2)),
+                self.width, self.height)
 
         self.players_group = pygame.sprite.Group()
         self.players_group.add(self.agentPlayer)
         self.players_group.add(self.target)
+        if self.version == 6:
+            self.players_group.add(self.target_1)
+            self.players_group.add(self.target_2)
 
         self.bullet_group = pygame.sprite.Group()
         self.bullet_list = []
@@ -343,6 +376,8 @@ class DotShooter(PyGameWrapper):
             self.agentPlayer.pos.x, self.agentPlayer.pos.y)
 
     def _reset_target(self):
+        if self.version == 3 or self.version == 5 or self.version == 6:
+            raise ValueError('Not reset target for v6')
         self.target.pos.x = self.width - self.player_dist_to_wall
         self.target.pos.y = random.randrange(
             self.player_height / 2, self.height - self.player_height / 2)
@@ -370,18 +405,25 @@ class DotShooter(PyGameWrapper):
 
         to_del = []
         for idx, bullet in enumerate(self.bullet_list):
-            bullet_status = bullet.update(self.target, dt)
+            if self.version == 6:
+                target_list = [self.target, self.target_1, self.target_2]
+                bullet_status = bullet.update(target_list, dt)
+            else:
+                bullet_status = bullet.update(self.target, dt)
 
-            if bullet_status == 1:  # target hit
+            if bullet_status >= 1:  # target hit
                 # self._reset_player()
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
-                if not (self.version == 3 or self.version == 5):
+                if not (self.version == 3 or self.version == 5 or self.version == 6):
                     self._reset_target()  # reset if not one hit
-                self.score_sum += self.rewards["positive"]
+                if bullet_status == 1:  # hit main target
+                    self.score_sum += self.rewards["positive"]
+                else:  # hit distractions
+                    self.score_sum += 0.5
                 self.score_counts['agent'] = self.score_sum
                 self.target_hit = True
-            elif bullet_status == 2:  # out of bound
+            elif bullet_status == 0:  # out of bound
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
         # delete bullets in the list
@@ -396,7 +438,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = DotShooter()
+    game = DotShooter(version=6)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
