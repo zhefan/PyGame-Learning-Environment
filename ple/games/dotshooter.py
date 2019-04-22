@@ -277,7 +277,7 @@ class DotShooter(PyGameWrapper):
             # exceed max step and no bullet in flight
             if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
                 return True
-        elif self.version == 5 or self.version == 6:  # shot clock one hit
+        elif self.version >= 5:  # shot clock one hit
             if self.n_steps >= self.MAX_STEPS and len(self.bullet_group) == 0:
                 return True
             return self.target_hit
@@ -296,7 +296,7 @@ class DotShooter(PyGameWrapper):
         self.n_steps = 0
         self.score_sum = 0.0
 
-        if self.version == 6:
+        if self.version >= 6:
             self.agentPlayer = Player(
                 self.players_speed_ratio * self.height,
                 self.player_width,
@@ -342,7 +342,7 @@ class DotShooter(PyGameWrapper):
         self.players_group = pygame.sprite.Group()
         self.players_group.add(self.agentPlayer)
         self.players_group.add(self.target)
-        if self.version == 6:
+        if self.version >= 6:
             self.players_group.add(self.target_1)
             self.players_group.add(self.target_2)
 
@@ -376,7 +376,7 @@ class DotShooter(PyGameWrapper):
             self.agentPlayer.pos.x, self.agentPlayer.pos.y)
 
     def _reset_target(self):
-        if self.version == 3 or self.version == 5 or self.version == 6:
+        if self.version == 3 or self.version >= 5:
             raise ValueError('Not reset target for v6')
         self.target.pos.x = self.width - self.player_dist_to_wall
         self.target.pos.y = random.randrange(
@@ -395,7 +395,10 @@ class DotShooter(PyGameWrapper):
         self._handle_player_events()
 
         # cost to move
-        self.score_sum += self.rewards["tick"]
+        if self.version <= 6:
+            self.score_sum += self.rewards["tick"]
+        else:
+            self.score_sum += self.rewards["negative"]
 
         self.agentPlayer.update(self.dy, dt)
         if self.version == 1:  # moving target
@@ -405,7 +408,7 @@ class DotShooter(PyGameWrapper):
 
         to_del = []
         for idx, bullet in enumerate(self.bullet_list):
-            if self.version == 6:
+            if self.version >= 6:
                 target_list = [self.target, self.target_1, self.target_2]
                 bullet_status = bullet.update(target_list, dt)
             else:
@@ -415,12 +418,20 @@ class DotShooter(PyGameWrapper):
                 # self._reset_player()
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
-                if not (self.version == 3 or self.version == 5 or self.version == 6):
+                if not (self.version == 3 or self.version >= 5):
                     self._reset_target()  # reset if not one hit
                 if bullet_status == 1:  # hit main target
-                    self.score_sum += self.rewards["positive"]
+                    if self.version <= 6:
+                        self.score_sum += self.rewards['positive']
+                    else:
+                        self.score_sum += 100.0
                 else:  # hit distractions
-                    self.score_sum += 0.5
+                    if self.version == 6:
+                        self.score_sum += 0.5
+                    elif self.version == 7:
+                        self.score_sum += 50.0
+                    else:
+                        raise ValueError('bullet state error')
                 self.score_counts['agent'] = self.score_sum
                 self.target_hit = True
             elif bullet_status == 0:  # out of bound
@@ -438,7 +449,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = DotShooter(version=6)
+    game = DotShooter(version=7)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
