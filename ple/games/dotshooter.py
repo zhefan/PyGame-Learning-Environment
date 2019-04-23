@@ -449,7 +449,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = DotShooter(version=7)
+    game = DotShooter(version=6)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
