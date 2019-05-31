@@ -175,8 +175,8 @@ class Player(pygame.sprite.Sprite):
 
 
 class DotShooter(PyGameWrapper):
-    def __init__(self, version=0, width=32, height=30, target_speed_ratio=1,
-                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=200):
+    def __init__(self, version=0, width=12, height=10, target_speed_ratio=1,
+                 players_speed_ratio=1, bullet_speed_ratio=1, MAX_STEPS=50):
 
         actions = {
             "up": K_UP,
@@ -452,7 +452,7 @@ if __name__ == "__main__":
     import numpy as np
 
     pygame.init()
-    game = DotShooter(width=32, height=30, version=8)
+    game = DotShooter(version=8)
     game.screen = pygame.display.set_mode(game.getScreenDims(), 0, 16)
     game.clock = pygame.time.Clock()
     game.rng = np.random.RandomState(24)
