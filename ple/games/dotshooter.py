@@ -438,8 +438,8 @@ class DotShooter(PyGameWrapper):
             elif bullet_status == 0:  # out of bound
                 to_del.append(idx)
                 self.bullet_group.remove(bullet)
-                if self.version == 7:
-                    self.target_hit = True  # one shot
+                if self.version == 7 or self.version == 8:
+                    self.target_hit = True  # enable one shot
         # delete bullets in the list
         for index in sorted(to_del, reverse=True):
             del self.bullet_list[index]
