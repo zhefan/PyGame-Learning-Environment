@@ -367,6 +367,10 @@ class DotShooter(PyGameWrapper):
         self.bullet_group.empty()
         del self.bullet_list[:]
         self.init()
+        # draw blank to init first frame
+        self.screen.fill((0, 0, 0))
+        self.players_group.draw(self.screen)
+        self.bullet_group.draw(self.screen)
         # after game over set random direction of bullet otherwise it will always be the same
         # self._reset_player()
 
