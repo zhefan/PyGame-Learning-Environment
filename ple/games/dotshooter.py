@@ -134,12 +134,12 @@ class Player(pygame.sprite.Sprite):
         self.vel.y = dy
         self.pos.y += self.vel.y * dt
 
-        if self.pos.y - self.rect_height / 2 <= 0:
-            self.pos.y = self.rect_height / 2
+        if self.pos.y - int(self.rect_height / 2) <= 0:
+            self.pos.y = int(self.rect_height / 2)
             self.vel.y = 0.0
 
-        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
-            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
+        if self.pos.y + int(self.rect_height / 2) >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - int(self.rect_height / 2) - 1
             self.vel.y = 0.0
 
         self.rect.center = (self.pos.x, self.pos.y)
@@ -149,11 +149,11 @@ class Player(pygame.sprite.Sprite):
             self.vel.y = self.speed
             self.pos.y += self.vel.y * dt
 
-        if self.pos.y - self.rect_height / 2 < 0:
-            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
+        if self.pos.y - int(self.rect_height / 2) < 0:
+            self.pos.y = self.SCREEN_HEIGHT - int(self.rect_height / 2) - 1
 
-        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT:
-            self.pos.y = self.rect_height / 2
+        if self.pos.y + int(self.rect_height / 2) >= self.SCREEN_HEIGHT:
+            self.pos.y = int(self.rect_height / 2)
 
         self.rect.center = (self.pos.x, self.pos.y)
 
@@ -165,11 +165,11 @@ class Player(pygame.sprite.Sprite):
                 self.vel.y = self.speed
             self.pos.y += self.vel.y * dt
 
-        if self.pos.y - self.rect_height / 2 <= 0:
-            self.pos.y = self.rect_height / 2
+        if self.pos.y - int(self.rect_height / 2) <= 0:
+            self.pos.y = int(self.rect_height / 2)
 
-        if self.pos.y + self.rect_height / 2 >= self.SCREEN_HEIGHT - 1:
-            self.pos.y = self.SCREEN_HEIGHT - self.rect_height / 2 - 1
+        if self.pos.y + int(self.rect_height / 2) >= self.SCREEN_HEIGHT - 1:
+            self.pos.y = self.SCREEN_HEIGHT - int(self.rect_height / 2) - 1
 
         self.rect.center = (self.pos.x, self.pos.y)
 
@@ -262,8 +262,8 @@ class DotShooter(PyGameWrapper):
 
         """
         state = {
-            "player_y": self.agentPlayer.pos.y - self.player_height / 2,  # offset
-            "target_y": self.target.pos.y - self.player_height / 2,  # offset
+            "player_y": self.agentPlayer.pos.y - int(self.player_height / 2),
+            "target_y": self.target.pos.y - int(self.player_height / 2),
             "bullet": len(self.bullet_group)  # number of bullets, max 1
         }
 
@@ -302,42 +302,42 @@ class DotShooter(PyGameWrapper):
                 self.player_width,
                 self.player_height,
                 (self.player_dist_to_wall,
-                 random.randrange(self.player_height / 2,
-                                  self.height - self.player_height / 2)),
+                 random.randrange(int(self.player_height / 2),
+                                  self.height - int(self.player_height / 2))),
                 self.width, self.height)
             self.target = Player(
                 self.target_speed_ratio * self.height,
                 self.player_width,
                 self.player_height,
-                (self.width - self.player_dist_to_wall, self.height / 2),
+                (self.width - self.player_dist_to_wall, int(self.height / 2)),
                 self.width, self.height)
             if self.version == 6 or self.version == 7:
                 self.target_1 = Player(  # distraction
                     self.target_speed_ratio * self.height,
                     self.player_width,
                     self.player_height,
-                    (self.width - self.player_dist_to_wall, self.height / 4),
+                    (self.width - self.player_dist_to_wall, int(self.height / 4)),
                     self.width, self.height, color=(0, 255, 0))
                 self.target_2 = Player(  # distraction
                     self.target_speed_ratio * self.height,
                     self.player_width,
                     self.player_height,
-                    (self.width - self.player_dist_to_wall, self.height * 3 / 4),
+                    (self.width - self.player_dist_to_wall, int(self.height * 3 / 4)),
                     self.width, self.height, color=(0, 255, 0))
         else:
             self.agentPlayer = Player(
                 self.players_speed_ratio * self.height,
                 self.player_width,
                 self.player_height,
-                (self.player_dist_to_wall, self.height / 2),
+                (self.player_dist_to_wall, int(self.height / 2)),
                 self.width, self.height)
             self.target = Player(
                 self.target_speed_ratio * self.height,
                 self.player_width,
                 self.player_height,
                 (self.width - self.player_dist_to_wall,
-                 random.randrange(self.player_height / 2,
-                                  self.height - self.player_height / 2)),
+                 random.randrange(int(self.player_height / 2),
+                                  self.height - int(self.player_height / 2))),
                 self.width, self.height)
 
         self.players_group = pygame.sprite.Group()
@@ -376,7 +376,7 @@ class DotShooter(PyGameWrapper):
 
     def _reset_player(self):
         self.agentPlayer.pos.x = self.player_dist_to_wall
-        self.agentPlayer.pos.y = self.height / 2
+        self.agentPlayer.pos.y = int(self.height / 2)
         self.agentPlayer.rect.center = (
             self.agentPlayer.pos.x, self.agentPlayer.pos.y)
 
@@ -385,7 +385,7 @@ class DotShooter(PyGameWrapper):
             raise ValueError('Not reset target for v6')
         self.target.pos.x = self.width - self.player_dist_to_wall
         self.target.pos.y = random.randrange(
-            self.player_height / 2, self.height - self.player_height / 2)
+            int(self.player_height / 2), self.height - int(self.player_height / 2))
         self.target.rect.center = (self.target.pos.x, self.target.pos.y)
 
     def step(self, dt):
