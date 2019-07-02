@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import numpy as np
 from PIL import Image  # pillow
 import sys
@@ -180,6 +181,11 @@ class PLE(object):
 
         """
         actions = self.game.actions
+        # python3 dict will change key order, use ordered dict to keep the alphabetical order
+        new_actions = OrderedDict()
+        for temp_action in sorted(actions.keys()):
+            new_actions[temp_action] = actions[temp_action]
+        actions = new_actions
 
         if (sys.version_info > (3, 0)): #python ver. 3
             if isinstance(actions, dict) or isinstance(actions, dict_values):
