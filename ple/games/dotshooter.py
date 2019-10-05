@@ -264,8 +264,7 @@ class DotShooter(PyGameWrapper):
         state = {
             "player_y": self.agentPlayer.pos.y - int(self.player_height / 2),
             "target_y": self.target.pos.y - int(self.player_height / 2),
-            # bullet_y
-            "bullet": -1 if not self.bullet_list else self.bullet_list[0].pos.y
+            "bullet": len(self.bullet_group)  # number of bullets, max 1
         }
 
         return state
@@ -466,10 +465,10 @@ if __name__ == "__main__":
     while True:
         dt = game.clock.tick_busy_loop(60)
         game.step(dt)
-        # if game.bullet_list:
-        #     print('player x: {}, player y: {}, target x: {}, target y: {}, bullet x: {}, score {}'.format(
-        #         game.agentPlayer.pos.x, game.agentPlayer.pos.y, game.target.pos.x,
-        #         game.target.pos.y, game.bullet_list[0].pos.x, game.score_sum))
-        # else:
-        print(game.getGameState(), len(game.bullet_list), game.score_sum)
+        if game.bullet_list:
+            print('player x: {}, player y: {}, target x: {}, target y: {}, bullet x: {}, score {}'.format(
+                game.agentPlayer.pos.x, game.agentPlayer.pos.y, game.target.pos.x,
+                game.target.pos.y, game.bullet_list[0].pos.x, game.score_sum))
+        else:
+            print(game.getGameState(), len(game.bullet_list), game.score_sum)
         pygame.display.update()
